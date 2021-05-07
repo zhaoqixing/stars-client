@@ -21,9 +21,9 @@ public class Test1 {
         TestParam param = new TestParam();
         param.setId(45892953706497L);
         Object resp = reqClient.pathReq(param);
-
-//        reqClient.testReq();
-//        reqClient.postReq("ok", "ok2");
-//        reqClient.pathReq( "10", "zhangsan");
+        System.out.println();
+        reqClient.testReq();
+        reqClient.postReq("ok", "ok2");
+        reqClient.pathReq( "10", "zhangsan");
     }
 }

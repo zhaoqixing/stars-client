@@ -38,10 +38,11 @@ public class MyRequstParamResolve extends FeignClientContext {
             url = get.url();
             mediaType = get.produces();
 //            return RegisteServe.RequestType.GET;
+        } else {
+            requestType = RegisteServe.RequestType.POST;
+            url = post.url();
+            mediaType = post.produces();
         }
-        requestType = RegisteServe.RequestType.POST;
-        url = post.url();
-        mediaType = post.produces();
         //解析方法上请求地址
 //        return RequestType.POST;
     }
