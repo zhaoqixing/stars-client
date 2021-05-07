@@ -1,6 +1,11 @@
 package com.stars.core;
 
+import com.stars.annotation.Get;
+import com.stars.annotation.Post;
 import org.omg.CORBA.PRIVATE_MEMBER;
+
+import java.lang.annotation.Annotation;
+import java.util.Arrays;
 
 /**
  * @author zhaoQiXing
@@ -9,11 +14,11 @@ import org.omg.CORBA.PRIVATE_MEMBER;
  */
 public class RegisteServe {
 
-    private String baseUrl;
+    protected String baseUrl;
 
-    private String url;
+    protected String url;
 
-    private RequestType requestType;
+    protected RequestType requestType;
 
     public RegisteServe() {
     }
@@ -48,12 +53,18 @@ public class RegisteServe {
         this.requestType = requestType;
     }
 
-    public enum RequestType{
-        GET,POST
+    public static enum RequestType{
+        GET(Get.class),POST(Post.class)
 
         ;
+        Class<?> aClass;
 
-        RequestType() {
+        RequestType(Class<?> aClass) {
+            this.aClass = aClass;
+        }
+
+        public Class<?> getaClass() {
+            return aClass;
         }
 
     }

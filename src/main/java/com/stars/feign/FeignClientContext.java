@@ -9,8 +9,23 @@ import java.util.HashMap;
  * @version 1.0
  * @date 2021/4/29 16:16
  */
-public class FeignClientContext extends RegisteServe {
+public class FeignClientContext{
 
-    //feign入参参数
+    RegisteServe.RequestType requestType;
+
+    String url;
+
+    String mediaType;
+
+    ParamBean paramBean;
+
+    public FeignClientContext() {
+    }
+
+    public FeignClientContext(RegisteServe.RequestType requestType, String url, String mediaType) {
+        this.requestType = requestType;
+        this.url = url;
+        this.mediaType = mediaType;
+    }
 
 }

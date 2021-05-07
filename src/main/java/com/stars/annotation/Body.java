@@ -1,5 +1,7 @@
 package com.stars.annotation;
 
+import org.springframework.core.annotation.AliasFor;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -8,13 +10,13 @@ import java.lang.annotation.Target;
 /**
  * @author zhaoQiXing
  * @version 1.0
- * @date 2021/4/28 17:12
+ * @date 2021/4/29 14:21
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
-public @interface Get {
+@Target(ElementType.PARAMETER)
+public @interface Body {
 
-    String url() default "";
+    String value() default "";
 
-    String produces() default "";
+    boolean required() default true;
 }

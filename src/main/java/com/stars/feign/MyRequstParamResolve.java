@@ -1,9 +1,7 @@
 package com.stars.feign;
 
-import com.stars.annotation.Get;
-import com.stars.annotation.Param;
-import com.stars.annotation.Path;
-import com.stars.annotation.Post;
+import com.stars.annotation.*;
+import com.stars.core.RegisteServe;
 import com.stars.exception.ReqTypeNotFoundException;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -20,23 +18,47 @@ import java.util.Set;
  */
 public class MyRequstParamResolve extends FeignClientContext {
 
-
-    public String resolveUrl(Method method, Object[] args) throws ReqTypeNotFoundException {
-        //解析方法上请求地址
-        return resolveMethod(method);
+    public MyRequstParamResolve() {
     }
 
-    public String resolveMethod(Method method) throws ReqTypeNotFoundException {
+
+//    public String resolveUrl(Method method) throws ReqTypeNotFoundException {
+//        //解析方法上请求地址
+//        return resolveMethod(method);
+//    }
+
+    public void resolveType(Method method) throws ReqTypeNotFoundException {
         Get get = method.getAnnotation(Get.class);
         Post post = method.getAnnotation(Post.class);
         if (get == null && post == null) {
             throw new ReqTypeNotFoundException("没有找到请求类型，需指定GET/POST");
         }
         if (get != null) {
-            return get.url();
+            requestType = RegisteServe.RequestType.GET;
+            url = get.url();
+            mediaType = get.produces();
+//            return RegisteServe.RequestType.GET;
         }
-        return post.url();
+        requestType = RegisteServe.RequestType.POST;
+        url = post.url();
+        mediaType = post.produces();
+        //解析方法上请求地址
+//        return RequestType.POST;
     }
+
+//    public String resolveMethod(Method method) throws ReqTypeNotFoundException {
+//        Get get = method.getAnnotation(Get.class);
+//        Post post = method.getAnnotation(Post.class);
+//        if (get == null && post == null) {
+//            throw new ReqTypeNotFoundException("没有找到请求类型，需指定GET/POST");
+//        }
+//        if (get != null) {
+//            requestType = RequestType.GET;
+//            return get.url();
+//        }
+//        requestType = RequestType.POST;
+//        return post.url();
+//    }
 
     //解析出入参信息
     public HashMap<String, ParamBean> convertParamBean(Method method, Object[] args){
@@ -54,34 +76,47 @@ public class MyRequstParamResolve extends FeignClientContext {
                     Path path = (Path) annot;
                     paramMap.put(path.value(), pathTypeHandle(path, args[i]));
                 }
+                if (annot.annotationType() == Body.class) {
+                    Body body = (Body) annot;
+                    paramMap.put("args", pathTypeHandle(body, args[i]));
+                }
             }
         }
         return paramMap;
     }
 
     // @Param 类型参数解析
-    public ParamBean paramTypeHandle(Param param, Object value){
-        String key = param.value();
+    public ParamBean paramTypeHandle(Param annotation, Object value){
+        String key = annotation.value();
         //必填
-        if (param.required()) {
+        if (annotation.required()) {
             Assert.notNull(value, key + " is required!");
         }
-        return new ParamBean(key, value, param);
+        return new ParamBean(key, value, annotation);
     }
 
     // @Path 类型参数解析
-    public ParamBean pathTypeHandle(Path param, Object value){
-        // TODO: 2021/4/29
-        String key = param.value();
+    public ParamBean pathTypeHandle(Path annotation, Object value){
+        String key = annotation.value();
         //必填
-        if (param.required()) {
+        if (annotation.required()) {
             Assert.notNull(value, key + " is required!");
         }
-        return new ParamBean(key, value, param);
+        return new ParamBean(key, value, annotation);
+    }
+
+    // @Body 类型参数解析
+    public ParamBean pathTypeHandle(Body annotation, Object value){
+        String key = annotation.value();
+        //必填
+        if (annotation.required()) {
+            Assert.notNull(value, key + " is required!");
+        }
+        return new ParamBean(key, value, annotation);
     }
 
     // 构建完整的URL
-    public String completeUrl(String baseUrl, String url, HashMap<String, ParamBean> paramMap){
+    public String completeUrl(String baseUrl, HashMap<String, ParamBean> paramMap){
         if (CollectionUtils.isEmpty(paramMap)) {
             return baseUrl;
         }
@@ -97,7 +132,9 @@ public class MyRequstParamResolve extends FeignClientContext {
         if (CollectionUtils.isEmpty(paramMap)) {
             return completeUrl;
         }
-        completeUrl = completeUrl + "?";
+        if (!(set.size() == 1 && set.contains("args"))) {
+            completeUrl = completeUrl + "?";
+        }
         for (String s : set) {
             ParamBean paramBean = paramMap.get(s);
             if (Param.class == paramBean.getAnnotation().annotationType()) {

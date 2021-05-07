@@ -1,5 +1,7 @@
 package com.stars.feign;
 
+import com.stars.core.RegisteServe;
+
 import java.lang.annotation.Annotation;
 
 /**
@@ -45,4 +47,5 @@ public class ParamBean {
         this.value = value;
         this.annotation = annotation;
     }
+
 }

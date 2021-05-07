@@ -15,4 +15,6 @@ import java.lang.annotation.Target;
 public @interface Post {
 
     String url() default "";
+
+    String produces() default "";
 }

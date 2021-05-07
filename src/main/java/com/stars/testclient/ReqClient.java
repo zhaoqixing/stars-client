@@ -1,13 +1,16 @@
 package com.stars.testclient;
 
 import com.stars.annotation.*;
+import com.stars.feign.MediaType;
+import com.stars.testclient.param.TestParam;
+
 
 /**
  * @author zhaoQiXing
  * @version 1.0
  * @date 2021/4/28 17:11
  */
-@MyFeignClient(baseUrl = "www.baidu.com")
+@MyFeignClient(baseUrl = "https://www.baidu.com")
 public interface ReqClient {
 
     @Get(url = "/111")
@@ -18,4 +21,7 @@ public interface ReqClient {
 
     @Post(url = "/post2/{id}")
     void pathReq(@Path(value = "id") String id,@Param(value = "name") String name);
+
+    @Post(url = "/111", produces = MediaType.APPLICATION_JSON_VALUE)
+    Object pathReq(@Body TestParam param);
 }
