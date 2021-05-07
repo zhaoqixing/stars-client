@@ -64,6 +64,7 @@ public class MyRequstParamResolve extends FeignClientContext {
     public HashMap<String, ParamBean> convertParamBean(Method method, Object[] args){
         HashMap<String, ParamBean> paramMap = new HashMap<String, ParamBean>();
         Annotation[][] annotations = method.getParameterAnnotations();
+        
         method.getParameterTypes();
         for (int i = 0; i < annotations.length; i++) {
             for (Annotation annot : annotations[i]) {
