@@ -43,23 +43,7 @@ public class MyRequstParamResolve extends FeignClientContext {
             url = post.url();
             mediaType = post.produces();
         }
-        //解析方法上请求地址
-//        return RequestType.POST;
     }
-
-//    public String resolveMethod(Method method) throws ReqTypeNotFoundException {
-//        Get get = method.getAnnotation(Get.class);
-//        Post post = method.getAnnotation(Post.class);
-//        if (get == null && post == null) {
-//            throw new ReqTypeNotFoundException("没有找到请求类型，需指定GET/POST");
-//        }
-//        if (get != null) {
-//            requestType = RequestType.GET;
-//            return get.url();
-//        }
-//        requestType = RequestType.POST;
-//        return post.url();
-//    }
 
     //解析出入参信息
     public HashMap<String, ParamBean> convertParamBean(Method method, Object[] args){
