@@ -1,8 +1,10 @@
 package com.stars.feign;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONException;
+import com.alibaba.fastjson.JSONObject;
 import com.stars.core.RegisteServe;
-import com.stars.handler.send.RegistrarServerManager;
+import com.stars.exception.MyJSONException;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -16,8 +18,6 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -30,26 +30,27 @@ import java.util.HashMap;
 public class MyClientInvocationHandler extends MyRequstParamResolve implements InvocationHandler {
 
     private String baseUrl;
-
-    private final RegistrarServerManager serverManager = new RegistrarServerManager();
-
-    public MyClientInvocationHandler(String baseUrl) {
+    private String serveName;
+    public MyClientInvocationHandler(String baseUrl, String serveName) {
         this.baseUrl = baseUrl;
+        this.serveName = serveName;
     }
 
     //进行代理调用 -> 进行远程调用
     public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
         resolveType(method);
+        // 匹配策略
+        matchHost();
         //解析参数
         HashMap<String, ParamBean> paramBeanHashMap = convertParamBean(method, args);
         String completeUrl = completeUrl(baseUrl, paramBeanHashMap);
-        System.out.println("即将发送请求地址：" + completeUrl);
-        return sendReq(paramBeanHashMap, completeUrl);
+        String respStr = sendReq(paramBeanHashMap, completeUrl);
+        return this.handlerResp(respStr, method.getReturnType());
     }
     //
 
     //
-    public Object sendReq(HashMap<String, ParamBean> param, String completeUrl){
+    public String sendReq(HashMap<String, ParamBean> param, String completeUrl){
         if (RegisteServe.RequestType.GET == requestType) {
             HttpGet get = new HttpGet(completeUrl);
             return execute(get);
@@ -59,30 +60,25 @@ public class MyClientInvocationHandler extends MyRequstParamResolve implements I
             ParamBean paramBean = param.get("args");
             if (!ObjectUtils.isEmpty(paramBean)) {
                 String body = JSON.toJSONString(paramBean.getValue());
-                StringEntity stringEntity = new StringEntity(body,"UTF-8");
+                StringEntity stringEntity = new StringEntity(body,"utf-8");
                 post.setEntity(stringEntity);
-                System.out.println("param :" + body);
                 if (StringUtils.hasText(mediaType)) {
                     post.setHeader("Content-Type", mediaType);
                 }
             }
-
             return execute(post);
         }
         throw new RuntimeException("不支持的请求类型 " + requestType);
     }
 
-    public HttpEntity execute(HttpRequestBase requestBase){
+    public String execute(HttpRequestBase requestBase){
         CloseableHttpClient client = HttpClientBuilder.create().build();
         CloseableHttpResponse response = null;
         try {
             response = client.execute(requestBase);
+            logger.info("响应状态为:" + response.getStatusLine());
             HttpEntity entity = response.getEntity();
-            System.out.println("响应状态为:" + response.getStatusLine());
-            if (entity != null) {
-                System.out.println("响应内容为:" + EntityUtils.toString(entity));
-            }
-            return entity;
+            return EntityUtils.toString(entity);
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
@@ -97,15 +93,40 @@ public class MyClientInvocationHandler extends MyRequstParamResolve implements I
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            return null;
         }
+        return "";
     }
 
     //加入参数
 
-    //选择调用策略
 
     //处理返回结果
+    private Object handlerResp(String resp, Class<?> returnType) throws IllegalAccessException, InstantiationException {
+        if (StringUtils.hasText(resp)) {
+            if (returnType == String.class) {
+                return resp;
+            } else if (returnType == void.class){
+                return null;
+            }
+            try{
+                return JSONObject.parseObject(resp, returnType);
+            } catch (JSONException e){
+                throw new MyJSONException("response Can't be transformed to " + returnType + " [response is " + resp + "]");
+            }
+        }
+        return returnType.newInstance();
+    }
 
 
+    private void matchHost () {
+        // 优先使用baseUrl
+        if (StringUtils.hasText(baseUrl)) {
+            return;
+        }
+        // todo serveName 不为空，去备份的注册服务寻找主机
+
+
+    }
+
+    //选择调用策略
 }

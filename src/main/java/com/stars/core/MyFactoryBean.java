@@ -14,6 +14,8 @@ public class MyFactoryBean implements FactoryBean {
 
     private String baseUrl;
 
+    private String serveName;
+
     private Class<?> type;
 
     public MyFactoryBean(String baseUrl, Class<?> type) {
@@ -21,8 +23,13 @@ public class MyFactoryBean implements FactoryBean {
         this.type = type;
     }
 
+    public MyFactoryBean(Class<?> type, String serveName){
+        this.serveName = serveName;
+        this.type = type;
+    }
+
     public Object getObject() throws Exception {
-        return Proxy.newProxyInstance(this.getClass().getClassLoader(), new Class[] {type}, new MyClientInvocationHandler(baseUrl));
+        return Proxy.newProxyInstance(this.getClass().getClassLoader(), new Class[] {type}, new MyClientInvocationHandler(baseUrl, serveName));
     }
 
     public Class<?> getObjectType() {

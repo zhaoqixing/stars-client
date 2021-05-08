@@ -9,6 +9,7 @@ import org.springframework.context.annotation.ClassPathScanningCandidateComponen
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
+import org.springframework.util.StringUtils;
 
 import java.util.Set;
 
@@ -39,7 +40,8 @@ public class MyFeignClientsRegistrar implements ImportBeanDefinitionRegistrar {
             for (BeanDefinition beanDefinition : definitions){
                 AnnotatedBeanDefinition adb = (AnnotatedBeanDefinition) beanDefinition;
                 String baseUrl = (String) adb.getMetadata().getAnnotationAttributes(MyFeignClient.class.getName()).get("baseUrl");
-                registerClientConfiguration(Class.forName(beanDefinition.getBeanClassName()), baseUrl, beanDefinitionRegistry);
+                String serveName = (String) adb.getMetadata().getAnnotationAttributes(MyFeignClient.class.getName()).get("serveName");
+                registerClientConfiguration(Class.forName(beanDefinition.getBeanClassName()), baseUrl, serveName, beanDefinitionRegistry);
 
             }
         } catch (ClassNotFoundException e) {
@@ -47,12 +49,17 @@ public class MyFeignClientsRegistrar implements ImportBeanDefinitionRegistrar {
         }
     }
 
-    public void registerClientConfiguration(Object type, Object baseUrl,  BeanDefinitionRegistry registry){
+    public void registerClientConfiguration(Object type, String baseUrl, String serveName, BeanDefinitionRegistry registry){
         String defaultName = type.toString().substring(type.toString().lastIndexOf(".") + 1);
         BeanDefinitionBuilder builder = BeanDefinitionBuilder
                 .genericBeanDefinition(MyFactoryBean.class);
-        builder.addConstructorArgValue(baseUrl);
-        builder.addConstructorArgValue(type);
+        if (StringUtils.hasText(baseUrl)) {
+            builder.addConstructorArgValue(baseUrl);
+            builder.addConstructorArgValue(type);
+        } else {
+            builder.addConstructorArgValue(type);
+            builder.addConstructorArgValue(serveName);
+        }
         registry.registerBeanDefinition(canonicalName(defaultName), builder.getBeanDefinition());
     }
 

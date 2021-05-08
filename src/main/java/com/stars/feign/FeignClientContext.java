@@ -1,6 +1,8 @@
 package com.stars.feign;
 
 import com.stars.core.RegisteServe;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 import java.util.HashMap;
 
@@ -11,13 +13,13 @@ import java.util.HashMap;
  */
 public class FeignClientContext{
 
-    RegisteServe.RequestType requestType;
+    protected Log logger = LogFactory.getLog(this.getClass());
 
-    String url;
+    protected RegisteServe.RequestType requestType;
 
-    String mediaType;
+    protected String url;
 
-    ParamBean paramBean;
+    protected String mediaType;
 
     public FeignClientContext() {
     }

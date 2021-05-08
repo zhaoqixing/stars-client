@@ -1,6 +1,8 @@
 package com.test;
 
+import com.alibaba.fastjson.JSON;
 import com.stars.App;
+import com.stars.feign.ParamBean;
 import com.stars.testclient.ReqClient;
 import com.stars.testclient.param.TestParam;
 import org.junit.Test;
@@ -18,10 +20,9 @@ public class Test1 {
     public void test1(){
         ApplicationContext applicationContext = new AnnotationConfigApplicationContext(App.class);
         ReqClient reqClient = (ReqClient)applicationContext.getBean("reqClient");
-        TestParam param = new TestParam();
-        param.setId(45892953706497L);
-        Object resp = reqClient.pathReq(param);
-        System.out.println();
+//        TestParam param = new TestParam();
+//        param.setId(45892953706497L);
+//        Object resp = reqClient.pathReq(param);
         reqClient.testReq();
         reqClient.postReq("ok", "ok2");
         reqClient.pathReq( "10", "zhangsan");

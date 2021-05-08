@@ -2,6 +2,7 @@ package com.stars.testclient;
 
 import com.stars.annotation.*;
 import com.stars.feign.MediaType;
+import com.stars.feign.ParamBean;
 import com.stars.testclient.param.TestParam;
 
 
@@ -10,7 +11,8 @@ import com.stars.testclient.param.TestParam;
  * @version 1.0
  * @date 2021/4/28 17:11
  */
-@MyFeignClient(baseUrl = "https://www.baidu.com")
+//@MyFeignClient(baseUrl = "https://www.baidu.com")
+@MyFeignClient(serveName = "https://www.baidu.com")
 public interface ReqClient {
 
     @Get(url = "/111")

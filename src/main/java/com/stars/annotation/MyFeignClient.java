@@ -15,4 +15,6 @@ import java.lang.annotation.Target;
 public @interface MyFeignClient {
 
     String baseUrl() default "";
+
+    String serveName() default "";
 }
